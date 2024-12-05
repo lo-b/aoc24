@@ -22,10 +22,6 @@ const (
 	min, max = 1, 3
 )
 
-type Report struct {
-	*dst.Queue
-}
-
 func main() {
 	file, err := os.Open("./assets/reports.txt")
 	if err != nil {
@@ -58,6 +54,13 @@ func main() {
 	fmt.Println("total valid report:", SafeReports(reports))
 }
 
+// Report encapsulates a report containing levels, which themselves are stored
+// as numbers (satellite data) inside a Queue.
+type Report struct {
+	*dst.Queue
+}
+
+// SafeReports counts the total amount of reports which are safe.
 func SafeReports(reports []Report) int {
 	// total count of valid reports
 	var validReportSum = 0
@@ -82,6 +85,11 @@ func SafeReports(reports []Report) int {
 	return validReportSum
 }
 
+// ReportIsValid checks validity of a report using the following criteria:
+//   - levels of the report are either in ascending or descending order
+//   - adjacent levels should differ least 1 and at most 3
+//
+// If both criteria are met return true, false otherwise.
 func ReportIsValid(element *dst.Element, sorting int, min int, max int) bool {
 	if element.Next == nil {
 		return true
@@ -113,6 +121,7 @@ func ReportIsValid(element *dst.Element, sorting int, min int, max int) bool {
 	return ReportIsValid(element.Next, sorting, min, max)
 }
 
+// CreateReport creates a new Report from nums integer arg(s).
 func CreateReport(nums ...int) *Report {
 	return &Report{
 		Queue: dst.NewQueueFromArray(nums),
