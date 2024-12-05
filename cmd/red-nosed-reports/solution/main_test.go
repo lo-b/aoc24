@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 
 	dst "github.com/lo-b/aoc24/internal/datastructures"
@@ -87,7 +86,6 @@ func constructReports(reportsInput [][]int) []Report {
 	var reports []Report
 	for row := 0; row < len(reportsInput); row++ {
 		nums := reportsInput[row]
-		fmt.Printf("adding nums: %v\n", nums)
 		reports = append(reports, *CreateReport(nums...))
 	}
 
