@@ -10,16 +10,12 @@ import (
 	dst "github.com/lo-b/aoc24/internal/datastructures"
 )
 
-// constants representing ordering
 const (
-	// ascending order
-	asc = iota
-	// descending order
-	desc = iota
-	// no sorting
-	none = iota
-
-	min, max = 1, 3
+	Asc          = iota // indicates ascending order.
+	Desc         = iota // indicates descending order.
+	None         = iota // indicates no order (unsorted).
+	minLevelDif  = 1    // minimum difference of adjacent levels.
+	maxLevelDiff = 3    // maximum adjacent level difference.
 )
 
 func main() {
@@ -29,11 +25,15 @@ func main() {
 		fmt.Println("Error:", err)
 		return
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			fmt.Printf("Error closing file: %v", err)
+		}
+	}()
 
 	reader := bufio.NewReader(file)
 
-	reports := []Report{}
+	var reports []Report
 	for {
 		level, err := reader.ReadString('\n')
 		if err != nil {
@@ -41,7 +41,7 @@ func main() {
 		}
 
 		reportTxtVals := strings.Fields(level)
-		reportNums := []int{}
+		var reportNums []int
 		for _, reportTxtVal := range reportTxtVals {
 			reportInt, _ := strconv.Atoi(reportTxtVal)
 
@@ -68,14 +68,14 @@ func SafeReports(reports []Report) int {
 		head, tail := report.Queue.Head, report.Queue.Tail
 		var sorting int
 		if head.Data < tail.Data {
-			sorting = asc
+			sorting = Asc
 		} else if head.Data > tail.Data {
-			sorting = desc
+			sorting = Desc
 		} else {
-			sorting = none
+			sorting = None
 		}
 
-		validReport := ReportIsValid(head, sorting, min, max)
+		validReport := ReportIsValid(head, sorting, minLevelDif, maxLevelDiff)
 
 		if validReport {
 			validReportSum++
@@ -95,22 +95,22 @@ func ReportIsValid(element *dst.Element, sorting int, min int, max int) bool {
 		return true
 	}
 
-	if sorting == asc && element.Data >= element.Next.Data {
+	if sorting == Asc && element.Data >= element.Next.Data {
 		return false
 	}
 
-	if sorting == desc && element.Data <= element.Next.Data {
+	if sorting == Desc && element.Data <= element.Next.Data {
 		return false
 	}
 
 	// Length that two adjacent levels differ by
 	var adjacentLevelDiff int
 
-	if sorting == asc {
+	if sorting == Asc {
 		adjacentLevelDiff = element.Next.Data - element.Data
 	}
 
-	if sorting == desc {
+	if sorting == Desc {
 		adjacentLevelDiff = element.Data - element.Next.Data
 	}
 

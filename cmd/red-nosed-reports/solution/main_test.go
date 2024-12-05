@@ -56,19 +56,19 @@ func TestReportIsSafe(t *testing.T) {
 		{
 			name:    "single element report is valid due to recursion",
 			report:  Report{dst.NewQueue(1)},
-			sorting: none,
+			sorting: None,
 			want:    true,
 		},
 		{
 			name:    "simple increasing list",
 			report:  Report{dst.NewQueue(1, 2, 3, 4)},
-			sorting: asc,
+			sorting: Asc,
 			want:    true,
 		},
 		{
 			name:    "simple decreasing list",
 			report:  Report{dst.NewQueue(4, 3, 2, 1)},
-			sorting: desc,
+			sorting: Desc,
 			want:    true,
 		},
 	}
