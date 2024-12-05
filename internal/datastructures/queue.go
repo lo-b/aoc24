@@ -25,13 +25,17 @@ type Element struct {
 
 // Add data as a new Element to the end of the queue.
 func (q *Queue) Enqueue(data int) {
-	if q.isEmpty() {
-		node := &Element{Data: data}
-		q.Head = node
-		q.Tail = node
+	newNode := &Element{Data: data}
 
+	if q.isEmpty() {
+		// Queue is empty; Head and Tail will point to the new node
+		q.Head = newNode
+		q.Tail = newNode
+	} else {
+		// Append to the end and move the Tail pointer
+		q.Tail.Next = newNode
+		q.Tail = newNode
 	}
-	q.Tail.Next = &Element{Data: data, Next: nil}
 }
 
 // Remove the first element in the queue, or NIL if Queue is empty, and return
@@ -49,6 +53,7 @@ func NewEmptyQueue() *Queue {
 	return &Queue{Head: nil, Tail: nil}
 }
 
+// Create a new Queue using variable int arg(s).
 func NewQueue(data ...int) *Queue {
 	var q = NewEmptyQueue()
 	for _, val := range data {
@@ -58,7 +63,17 @@ func NewQueue(data ...int) *Queue {
 	return q
 }
 
-// isEmpty checks if the Queue is empty (Head and Tail are both NIL)
+// Create new Queue from an array of integers.
+func NewQueueFromArray(data []int) *Queue {
+	var q = NewEmptyQueue()
+	for _, val := range data {
+		q.Enqueue(val)
+	}
+
+	return q
+}
+
+// isEmpty checks if the Queue is empty (i.e. Tail is NIL)
 func (q *Queue) isEmpty() bool {
-	return q.Head == q.Tail
+	return q.Tail == nil
 }
