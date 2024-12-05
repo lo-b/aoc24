@@ -113,14 +113,6 @@ func ReportIsValid(element *dst.Element, sorting int, min int, max int) bool {
 	return ReportIsValid(element.Next, sorting, min, max)
 }
 
-func levelDiffOutOfBound(levelDiff int, min int, max int) bool {
-	if levelDiff < min || levelDiff > max {
-		return true
-	}
-
-	return false
-}
-
 func CreateReport(nums ...int) *Report {
 	return &Report{
 		Queue: dst.NewQueueFromArray(nums),

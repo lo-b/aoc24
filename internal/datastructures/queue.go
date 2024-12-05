@@ -23,7 +23,7 @@ type Element struct {
 	Next *Element
 }
 
-// Add data as a new Element to the end of the queue.
+// Enqueue adds data as a new Element to the end of the queue.
 func (q *Queue) Enqueue(data int) {
 	newNode := &Element{Data: data}
 
@@ -38,7 +38,7 @@ func (q *Queue) Enqueue(data int) {
 	}
 }
 
-// Remove the first element in the queue, or NIL if Queue is empty, and return
+// Dequeue removes the first element in the queue, or NIL if Queue is empty, and return
 // it.
 func (q *Queue) Dequeue() *Element {
 	if q.isEmpty() {
@@ -53,7 +53,7 @@ func NewEmptyQueue() *Queue {
 	return &Queue{Head: nil, Tail: nil}
 }
 
-// Create a new Queue using variable int arg(s).
+// NewQueue creates a new Queue using variable int arg(s).
 func NewQueue(data ...int) *Queue {
 	var q = NewEmptyQueue()
 	for _, val := range data {
@@ -63,7 +63,7 @@ func NewQueue(data ...int) *Queue {
 	return q
 }
 
-// Create new Queue from an array of integers.
+// NewQueueFromArray creates new Queue from an array of integers.
 func NewQueueFromArray(data []int) *Queue {
 	var q = NewEmptyQueue()
 	for _, val := range data {
