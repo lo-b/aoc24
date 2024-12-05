@@ -84,7 +84,7 @@ func TestReportIsSafe(t *testing.T) {
 }
 
 func constructReports(reportsInput [][]int) []Report {
-	reports := []Report{}
+	var reports []Report
 	for row := 0; row < len(reportsInput); row++ {
 		nums := reportsInput[row]
 		fmt.Printf("adding nums: %v\n", nums)
