@@ -146,7 +146,7 @@ func TestIsSafeWithValidation(t *testing.T) {
 		{
 			name:    "Valid_AscendingLevels_ValidAfterRemovingFirstLevel",
 			report:  Report{dst.NewQueue(9, 1, 2, 3, 4)},
-			sorting: Asc,
+			sorting: Desc,
 			want:    true,
 		},
 		{

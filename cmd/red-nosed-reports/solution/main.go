@@ -137,13 +137,47 @@ func ReportIsValidWithToleration(element *dst.Element, sorting int, min int, max
 		return true
 	}
 
+	// FIX: current implementation of tolerance will always skip the left
+	// element (e.g. 9, 1, 2, 3) is valid but branching always keeps the
+	// current element on branching and skipping next (recursive call with
+	// .Next.Next). Bug above is prob fixed when also branching per discared
+	// element, i.e.:
+	//   - discard 1st => recursive call with .Next
+	//   - discard 2nd => recursive call with .Next.Next (as is)
+
 	if sorting == Asc && element.Data >= element.Next.Data {
 		if !removedLevel && element.Next.Next == nil {
 			return true
 		}
-		if !removedLevel && ReportIsValidWithToleration(element.Next.Next, sorting, min, max, true) {
+
+		// calculate the new adjacent level diff of the next's next element
+		// data, minus current element data
+		var recalculatedDiff = element.Data - element.Next.Next.Data
+
+		// reset the sorting
+		if recalculatedDiff < 0 {
+			sorting = Asc
+		} else if recalculatedDiff > 0 {
+			sorting = Desc
+		} else {
+			return false
+		}
+
+		var adjacentLevelDiff int
+		if sorting == Asc {
+			adjacentLevelDiff = element.Next.Next.Data - element.Data
+		}
+
+		if sorting == Desc {
+			adjacentLevelDiff = element.Data - element.Next.Next.Data
+		}
+
+		inBounds := adjacentLevelDiff >= min && adjacentLevelDiff <= max
+
+		if !removedLevel && inBounds && ReportIsValidWithToleration(element.Next.Next, sorting, min, max, true) {
 			return true
 		}
+
 		return false
 	}
 
@@ -151,12 +185,32 @@ func ReportIsValidWithToleration(element *dst.Element, sorting int, min int, max
 		if !removedLevel && element.Next.Next == nil {
 			return true
 		}
-		// FIX: ensure new adjecent levels are in bounds when
-		// skipping/removing a level... recursive func only checks NEXT
-		// elements level diff
-		// FIX: sorting is determined based on Head and Tail in queue. When either
-		// one is removed with tolerance, sorting has to be redetermined.
-		if !removedLevel && ReportIsValidWithToleration(element.Next.Next, sorting, min, max, true) {
+
+		// calculate the new adjacent level diff of the next's next element
+		// data, minus current element data
+		var recalculatedDiff = element.Data - element.Next.Next.Data
+
+		// reset the sorting
+		if recalculatedDiff < 0 {
+			sorting = Asc
+		} else if recalculatedDiff > 0 {
+			sorting = Desc
+		} else {
+			return false
+		}
+
+		var adjacentLevelDiff int
+		if sorting == Asc {
+			adjacentLevelDiff = element.Next.Next.Data - element.Data
+		}
+
+		if sorting == Desc {
+			adjacentLevelDiff = element.Data - element.Next.Next.Data
+		}
+
+		inBounds := adjacentLevelDiff >= min && adjacentLevelDiff <= max
+
+		if !removedLevel && inBounds && ReportIsValidWithToleration(element.Next.Next, sorting, min, max, true) {
 			return true
 		}
 		return false
@@ -177,7 +231,35 @@ func ReportIsValidWithToleration(element *dst.Element, sorting int, min int, max
 		if element.Next.Next == nil {
 			return true
 		}
-		if !removedLevel && ReportIsValidWithToleration(element.Next.Next, sorting, min, max, true) {
+
+		// calculate the new adjacent level diff of the next's next element
+		// data, minus current element data
+		var recalculatedDiff = element.Data - element.Next.Next.Data
+
+		// reset the sorting
+		if recalculatedDiff < 0 {
+			sorting = Asc
+		}
+
+		if recalculatedDiff > 0 {
+			sorting = Desc
+		}
+
+		if recalculatedDiff == 0 {
+			return false
+		}
+
+		if sorting == Asc {
+			adjacentLevelDiff = element.Next.Next.Data - element.Data
+		}
+
+		if sorting == Desc {
+			adjacentLevelDiff = element.Data - element.Next.Next.Data
+		}
+
+		inBounds := adjacentLevelDiff >= min && adjacentLevelDiff <= max
+
+		if !removedLevel && inBounds && ReportIsValidWithToleration(element.Next.Next, sorting, min, max, true) {
 			return true
 		}
 		return false
