@@ -14,11 +14,16 @@ const (
 	Asc          = iota // indicates ascending order.
 	Desc         = iota // indicates descending order.
 	None         = iota // indicates no order (unsorted).
-	minLevelDif  = 1    // minimum difference of adjacent levels.
-	maxLevelDiff = 3    // maximum adjacent level difference.
+	MinLevelDif  = 1    // minimum difference of adjacent levels.
+	MaxLevelDiff = 3    // maximum adjacent level difference.
 )
 
 func main() {
+	var useTolerance bool
+
+	fmt.Println("Use tolerance module? true/False")
+	fmt.Scanln(&useTolerance)
+
 	file, err := os.Open("./assets/reports.txt")
 	if err != nil {
 		fmt.Println("Unable to read input file")
@@ -51,7 +56,7 @@ func main() {
 		reports = append(reports, *CreateReport(reportNums...))
 	}
 
-	fmt.Println("total valid report:", SafeReports(reports))
+	fmt.Println("total valid report:", SafeReports(reports, useTolerance))
 }
 
 // Report encapsulates a report containing levels, which themselves are stored
@@ -61,7 +66,7 @@ type Report struct {
 }
 
 // SafeReports counts the total amount of reports which are safe.
-func SafeReports(reports []Report) int {
+func SafeReports(reports []Report, useTolerance bool) int {
 	// total count of valid reports
 	var validReportSum = 0
 	for _, report := range reports {
@@ -75,7 +80,13 @@ func SafeReports(reports []Report) int {
 			sorting = None
 		}
 
-		validReport := ReportIsValid(head, sorting, minLevelDif, maxLevelDiff)
+		var validReport bool
+		if useTolerance {
+			validReport = ReportIsValidWithToleration(head, sorting, MinLevelDif, MaxLevelDiff, false)
+
+		} else {
+			validReport = ReportIsValid(head, sorting, MinLevelDif, MaxLevelDiff)
+		}
 
 		if validReport {
 			validReportSum++
@@ -119,6 +130,60 @@ func ReportIsValid(element *dst.Element, sorting int, min int, max int) bool {
 	}
 
 	return ReportIsValid(element.Next, sorting, min, max)
+}
+
+func ReportIsValidWithToleration(element *dst.Element, sorting int, min int, max int, removedLevel bool) bool {
+	if element.Next == nil {
+		return true
+	}
+
+	if sorting == Asc && element.Data >= element.Next.Data {
+		if !removedLevel && element.Next.Next == nil {
+			return true
+		}
+		if !removedLevel && ReportIsValidWithToleration(element.Next.Next, sorting, min, max, true) {
+			return true
+		}
+		return false
+	}
+
+	if sorting == Desc && element.Data <= element.Next.Data {
+		if !removedLevel && element.Next.Next == nil {
+			return true
+		}
+		// FIX: ensure new adjecent levels are in bounds when
+		// skipping/removing a level... recursive func only checks NEXT
+		// elements level diff
+		// FIX: sorting is determined based on Head and Tail in queue. When either
+		// one is removed with tolerance, sorting has to be redetermined.
+		if !removedLevel && ReportIsValidWithToleration(element.Next.Next, sorting, min, max, true) {
+			return true
+		}
+		return false
+	}
+
+	// Length that two adjacent levels differ by
+	var adjacentLevelDiff int
+
+	if sorting == Asc {
+		adjacentLevelDiff = element.Next.Data - element.Data
+	}
+
+	if sorting == Desc {
+		adjacentLevelDiff = element.Data - element.Next.Data
+	}
+
+	if adjacentLevelDiff < min || adjacentLevelDiff > max {
+		if element.Next.Next == nil {
+			return true
+		}
+		if !removedLevel && ReportIsValidWithToleration(element.Next.Next, sorting, min, max, true) {
+			return true
+		}
+		return false
+	}
+
+	return ReportIsValidWithToleration(element.Next, sorting, min, max, false)
 }
 
 // CreateReport creates a new Report from nums integer arg(s).

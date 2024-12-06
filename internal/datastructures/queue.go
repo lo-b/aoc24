@@ -1,6 +1,6 @@
 // Package datastructures contains utility data structures.
 //
-// The datastructures package can be used to sole Advent of Code puzzles.
+// The datastructures package can be used to solve Advent of Code puzzles.
 package datastructures
 
 // Queue implements a dynamic set with the first-in, first-out (FIFO) policy
