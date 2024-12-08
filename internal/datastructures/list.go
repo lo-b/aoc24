@@ -38,3 +38,26 @@ func (list *DoubleLinkedList) Delete(element *ListElement) {
 		list.Tail = element.Prev
 	}
 }
+
+func NewEmptyList() *DoubleLinkedList {
+	return &DoubleLinkedList{Head: nil, Tail: nil}
+}
+
+// NewQueue creates a new Queue using variable int arg(s).
+func NewList(keys ...int) *DoubleLinkedList {
+	var list = NewEmptyList()
+	for _, key := range keys {
+		list.Insert(&ListElement{Key: key, Next: nil, Prev: nil})
+	}
+
+	return list
+}
+
+func NewListFromSlice(keys []int) *DoubleLinkedList {
+	var list = NewEmptyList()
+	for _, key := range keys {
+		list.Insert(&ListElement{Key: key})
+	}
+
+	return list
+}

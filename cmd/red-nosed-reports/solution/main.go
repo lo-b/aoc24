@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"cmp"
 	"fmt"
 	"os"
 	"strconv"
@@ -63,6 +64,10 @@ func main() {
 // as numbers (satellite data) inside a Queue.
 type Report struct {
 	*dst.Queue
+}
+
+type ImprovedReport struct {
+	*dst.DoubleLinkedList
 }
 
 // SafeReports counts the total amount of reports which are safe.
@@ -130,6 +135,139 @@ func ReportIsValid(element *dst.Element, sorting int, min int, max int) bool {
 	}
 
 	return ReportIsValid(element.Next, sorting, min, max)
+}
+
+func ImprovedReportValid(list *dst.DoubleLinkedList, element *dst.ListElement, sorting int, min int, max int, removedLevel bool) bool {
+	// NOTE: not recovered previously and next element is Tail
+	if !removedLevel && element.Next.Next == nil {
+		return true
+	}
+
+	elementInvalid := !IsValid(element, min, max, sorting)
+
+	// NOTE: element is invalid & previously recovered
+	if elementInvalid && removedLevel {
+		return false
+	}
+
+	if !elementInvalid && list.Head == list.Tail {
+		return true
+	}
+
+	if !elementInvalid && list.Head == nil || list.Tail == nil {
+		return true
+	}
+	if !elementInvalid && list.Head == list.Tail {
+		return true
+	}
+
+	// try with recover
+	if !removedLevel && elementInvalid {
+		var listElementRemoved = CopyList(*list)
+		var listChildRemoved = CopyList(*list)
+		listElementRemoved.Delete(element)
+		listChildRemoved.Delete(element.Next)
+		return ImprovedReportValid(listElementRemoved, element.Next, sorting, min, max, true) ||
+			ImprovedReportValid(listChildRemoved, element.Next.Next, sorting, min, max, true)
+	}
+
+	if !elementInvalid && element.Next != nil {
+		list.Delete(element)
+		return ImprovedReportValid(list, element.Next, sorting, min, max, removedLevel)
+	}
+
+	return false
+}
+
+func CopyList(list dst.DoubleLinkedList) *dst.DoubleLinkedList {
+	e := list.Head
+	listCopy := dst.NewEmptyList()
+	for {
+		if e.Next == nil {
+			break
+		}
+		listCopy.Insert(&dst.ListElement{Key: e.Key})
+		e = e.Next
+	}
+
+	return listCopy
+}
+
+func IsValid(element *dst.ListElement, min int, max int, sorting int) bool {
+	var prevSorting int
+	var prevLevelDiff int
+	var nextSorting int
+	var nextLevelDiff int
+
+	if element.Next != nil {
+
+		// -1 if x is less than y,
+		//  0 if x equals y,
+		// +1 if x is greater than y.
+		nextSorting = cmp.Compare(element.Key, element.Next.Key)
+
+		// NOTE: ascending order
+		if nextSorting < 0 {
+			nextLevelDiff = element.Next.Key - element.Key
+
+			// NOTE: descending order
+		} else if nextSorting > 0 {
+			nextLevelDiff = element.Key - element.Next.Key
+			// NOTE: equal curr & next element
+		} else {
+			return false
+		}
+	}
+
+	if element.Prev != nil {
+		// NOTE: compare elements 'left-to-right'
+		prevSorting = cmp.Compare(element.Prev.Key, element.Key)
+
+		// NOTE:
+		if prevSorting < 0 {
+			prevLevelDiff = element.Key - element.Prev.Key
+			// NOTE: descending order
+		} else if prevSorting > 0 {
+			prevLevelDiff = element.Prev.Key - element.Key
+			// NOTE: equal curr & next element
+		} else {
+			return false
+		}
+
+	}
+
+	if element.Next != nil && (nextLevelDiff < min || nextLevelDiff > max || nextSorting != sorting) {
+		return false
+	}
+
+	if element.Prev != nil && (prevLevelDiff < min || prevLevelDiff > max || prevSorting != sorting) {
+		return false
+	}
+
+	return true
+}
+
+func calcLevelDiff(element *dst.ListElement, sorting int) int {
+	if sorting == Asc {
+		return element.Next.Key - element.Key
+	}
+
+	if sorting == Desc {
+		return element.Key - element.Next.Key
+	}
+
+	return 0
+}
+
+func determineSorting(element *dst.ListElement) int {
+	if element.Key > element.Next.Key {
+		return Desc
+	}
+	if element.Key < element.Next.Key {
+		return Asc
+	}
+
+	return None
 }
 
 func ReportIsValidWithToleration(element *dst.Element, sorting int, min int, max int, removedLevel bool) bool {
@@ -272,5 +410,12 @@ func ReportIsValidWithToleration(element *dst.Element, sorting int, min int, max
 func CreateReport(nums ...int) *Report {
 	return &Report{
 		Queue: dst.NewQueueFromArray(nums),
+	}
+}
+
+// CreateReport creates a new Report from nums integer arg(s).
+func CreateImprovedReport(nums ...int) *ImprovedReport {
+	return &ImprovedReport{
+		DoubleLinkedList: dst.NewListFromSlice(nums),
 	}
 }
