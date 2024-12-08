@@ -156,18 +156,12 @@ func ImprovedReportValid(list *dst.DoubleLinkedList, element *dst.ListElement, s
 		return false
 	}
 
-	if !elementInvalid && list.Head == list.Tail {
+	// NOTE: curr element == Tail
+	if !elementInvalid && element.Next == nil {
 		return true
 	}
 
-	if !elementInvalid && list.Head == nil || list.Tail == nil {
-		return true
-	}
-	if !elementInvalid && list.Head == list.Tail {
-		return true
-	}
-
-	// try with recover
+	// try with recoverr
 	if !removedLevel && elementInvalid {
 		var listElementRemoved = CopyList(*list)
 		var listChildRemoved = CopyList(*list)
@@ -177,12 +171,7 @@ func ImprovedReportValid(list *dst.DoubleLinkedList, element *dst.ListElement, s
 			ImprovedReportValid(listChildRemoved, element.Next.Next, sorting, min, max, true)
 	}
 
-	if !elementInvalid && element.Next != nil {
-		list.Delete(element)
-		return ImprovedReportValid(list, element.Next, sorting, min, max, removedLevel)
-	}
-
-	return false
+	return ImprovedReportValid(list, element.Next, sorting, min, max, removedLevel)
 }
 
 func CopyList(list dst.DoubleLinkedList) *dst.DoubleLinkedList {
