@@ -39,7 +39,9 @@ func main() {
 
 	reader := bufio.NewReader(file)
 
-	var reports []Report
+	var reportLists []ReportDoublyLinkedList
+	var reportQeueus []ReportQueue
+	var validReportCount int
 	for {
 		level, err := reader.ReadString('\n')
 		if err != nil {
@@ -54,24 +56,36 @@ func main() {
 			reportNums = append(reportNums, reportInt)
 		}
 
-		reports = append(reports, *CreateReport(reportNums...))
+		if useTolerance {
+			reportLists = append(reportLists, *CreateImprovedReport(reportNums...))
+			// FIX: todo
+		} else {
+			reportQeueus = append(reportQeueus, *CreateReport(reportNums...))
+		}
 	}
 
-	fmt.Println("total valid report:", SafeReports(reports, useTolerance))
+	if !useTolerance {
+		validReportCount = SafeReportQueues(reportQeueus, useTolerance)
+	} else {
+		// FIX: todo
+		validReportCount = 0
+	}
+
+	fmt.Printf("total valid report: %d\n", validReportCount)
 }
 
-// Report encapsulates a report containing levels, which themselves are stored
+// ReportQueue encapsulates a report containing levels, which themselves are stored
 // as numbers (satellite data) inside a Queue.
-type Report struct {
+type ReportQueue struct {
 	*dst.Queue
 }
 
-type ImprovedReport struct {
+type ReportDoublyLinkedList struct {
 	*dst.DoubleLinkedList
 }
 
-// SafeReports counts the total amount of reports which are safe.
-func SafeReports(reports []Report, useTolerance bool) int {
+// SafeReportQueues counts the total amount of reports which are safe.
+func SafeReportQueues(reports []ReportQueue, useTolerance bool) int {
 	// total count of valid reports
 	var validReportSum = 0
 	for _, report := range reports {
@@ -85,15 +99,7 @@ func SafeReports(reports []Report, useTolerance bool) int {
 			sorting = None
 		}
 
-		var validReport bool
-		if useTolerance {
-			validReport = ReportIsValidWithToleration(head, sorting, MinLevelDif, MaxLevelDiff, false)
-
-		} else {
-			validReport = ReportIsValid(head, sorting, MinLevelDif, MaxLevelDiff)
-		}
-
-		if validReport {
+		if ValidQueue(head, sorting, MinLevelDif, MaxLevelDiff) {
 			validReportSum++
 		}
 	}
@@ -101,12 +107,12 @@ func SafeReports(reports []Report, useTolerance bool) int {
 	return validReportSum
 }
 
-// ReportIsValid checks validity of a report using the following criteria:
+// ValidQueue checks validity of a report using the following criteria:
 //   - levels of the report are either in ascending or descending order
 //   - adjacent levels should differ least 1 and at most 3
 //
 // If both criteria are met return true, false otherwise.
-func ReportIsValid(element *dst.Element, sorting int, min int, max int) bool {
+func ValidQueue(element *dst.Element, sorting int, min int, max int) bool {
 	if element.Next == nil {
 		return true
 	}
@@ -134,7 +140,7 @@ func ReportIsValid(element *dst.Element, sorting int, min int, max int) bool {
 		return false
 	}
 
-	return ReportIsValid(element.Next, sorting, min, max)
+	return ValidQueue(element.Next, sorting, min, max)
 }
 
 func ImprovedReportValid(list *dst.DoubleLinkedList, element *dst.ListElement, sorting int, min int, max int, removedLevel bool) bool {
@@ -247,175 +253,16 @@ func IsValid(element *dst.ListElement, min int, max int, sorting int) bool {
 	return true
 }
 
-func calcLevelDiff(element *dst.ListElement, sorting int) int {
-	if sorting == Asc {
-		return element.Next.Key - element.Key
-	}
-
-	if sorting == Desc {
-		return element.Key - element.Next.Key
-	}
-
-	return 0
-}
-
-func determineSorting(element *dst.ListElement) int {
-	if element.Key > element.Next.Key {
-		return Desc
-	}
-	if element.Key < element.Next.Key {
-		return Asc
-	}
-
-	return None
-}
-
-func ReportIsValidWithToleration(element *dst.Element, sorting int, min int, max int, removedLevel bool) bool {
-	if element.Next == nil {
-		return true
-	}
-
-	// FIX: current implementation of tolerance will always skip the left
-	// element (e.g. 9, 1, 2, 3) is valid but branching always keeps the
-	// current element on branching and skipping next (recursive call with
-	// .Next.Next). Bug above is prob fixed when also branching per discared
-	// element, i.e.:
-	//   - discard 1st => recursive call with .Next
-	//   - discard 2nd => recursive call with .Next.Next (as is)
-
-	if sorting == Asc && element.Data >= element.Next.Data {
-		if !removedLevel && element.Next.Next == nil {
-			return true
-		}
-
-		// calculate the new adjacent level diff of the next's next element
-		// data, minus current element data
-		var recalculatedDiff = element.Data - element.Next.Next.Data
-
-		// reset the sorting
-		if recalculatedDiff < 0 {
-			sorting = Asc
-		} else if recalculatedDiff > 0 {
-			sorting = Desc
-		} else {
-			return false
-		}
-
-		var adjacentLevelDiff int
-		if sorting == Asc {
-			adjacentLevelDiff = element.Next.Next.Data - element.Data
-		}
-
-		if sorting == Desc {
-			adjacentLevelDiff = element.Data - element.Next.Next.Data
-		}
-
-		inBounds := adjacentLevelDiff >= min && adjacentLevelDiff <= max
-
-		if !removedLevel && inBounds && ReportIsValidWithToleration(element.Next.Next, sorting, min, max, true) {
-			return true
-		}
-
-		return false
-	}
-
-	if sorting == Desc && element.Data <= element.Next.Data {
-		if !removedLevel && element.Next.Next == nil {
-			return true
-		}
-
-		// calculate the new adjacent level diff of the next's next element
-		// data, minus current element data
-		var recalculatedDiff = element.Data - element.Next.Next.Data
-
-		// reset the sorting
-		if recalculatedDiff < 0 {
-			sorting = Asc
-		} else if recalculatedDiff > 0 {
-			sorting = Desc
-		} else {
-			return false
-		}
-
-		var adjacentLevelDiff int
-		if sorting == Asc {
-			adjacentLevelDiff = element.Next.Next.Data - element.Data
-		}
-
-		if sorting == Desc {
-			adjacentLevelDiff = element.Data - element.Next.Next.Data
-		}
-
-		inBounds := adjacentLevelDiff >= min && adjacentLevelDiff <= max
-
-		if !removedLevel && inBounds && ReportIsValidWithToleration(element.Next.Next, sorting, min, max, true) {
-			return true
-		}
-		return false
-	}
-
-	// Length that two adjacent levels differ by
-	var adjacentLevelDiff int
-
-	if sorting == Asc {
-		adjacentLevelDiff = element.Next.Data - element.Data
-	}
-
-	if sorting == Desc {
-		adjacentLevelDiff = element.Data - element.Next.Data
-	}
-
-	if adjacentLevelDiff < min || adjacentLevelDiff > max {
-		if element.Next.Next == nil {
-			return true
-		}
-
-		// calculate the new adjacent level diff of the next's next element
-		// data, minus current element data
-		var recalculatedDiff = element.Data - element.Next.Next.Data
-
-		// reset the sorting
-		if recalculatedDiff < 0 {
-			sorting = Asc
-		}
-
-		if recalculatedDiff > 0 {
-			sorting = Desc
-		}
-
-		if recalculatedDiff == 0 {
-			return false
-		}
-
-		if sorting == Asc {
-			adjacentLevelDiff = element.Next.Next.Data - element.Data
-		}
-
-		if sorting == Desc {
-			adjacentLevelDiff = element.Data - element.Next.Next.Data
-		}
-
-		inBounds := adjacentLevelDiff >= min && adjacentLevelDiff <= max
-
-		if !removedLevel && inBounds && ReportIsValidWithToleration(element.Next.Next, sorting, min, max, true) {
-			return true
-		}
-		return false
-	}
-
-	return ReportIsValidWithToleration(element.Next, sorting, min, max, false)
-}
-
 // CreateReport creates a new Report from nums integer arg(s).
-func CreateReport(nums ...int) *Report {
-	return &Report{
+func CreateReport(nums ...int) *ReportQueue {
+	return &ReportQueue{
 		Queue: dst.NewQueueFromArray(nums),
 	}
 }
 
 // CreateReport creates a new Report from nums integer arg(s).
-func CreateImprovedReport(nums ...int) *ImprovedReport {
-	return &ImprovedReport{
+func CreateImprovedReport(nums ...int) *ReportDoublyLinkedList {
+	return &ReportDoublyLinkedList{
 		DoubleLinkedList: dst.NewListFromSlice(nums),
 	}
 }

@@ -37,7 +37,7 @@ func TestSafeReports(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ans := SafeReports(constructReports(tt.reportsArray), false)
+			ans := SafeReportQueues(constructReports(tt.reportsArray), false)
 			if ans != tt.want {
 				t.Errorf("got %v, want %v", ans, tt.want)
 			}
@@ -48,25 +48,25 @@ func TestSafeReports(t *testing.T) {
 func TestReportIsSafe(t *testing.T) {
 	var tests = []struct {
 		name    string
-		report  Report
+		report  ReportQueue
 		sorting int
 		want    bool
 	}{
 		{
 			name:    "single element report is valid due to recursion",
-			report:  Report{dst.NewQueue(1)},
+			report:  ReportQueue{dst.NewQueue(1)},
 			sorting: None,
 			want:    true,
 		},
 		{
 			name:    "simple increasing list",
-			report:  Report{dst.NewQueue(1, 2, 3, 4)},
+			report:  ReportQueue{dst.NewQueue(1, 2, 3, 4)},
 			sorting: Asc,
 			want:    true,
 		},
 		{
 			name:    "simple decreasing list",
-			report:  Report{dst.NewQueue(4, 3, 2, 1)},
+			report:  ReportQueue{dst.NewQueue(4, 3, 2, 1)},
 			sorting: Desc,
 			want:    true,
 		},
@@ -74,7 +74,7 @@ func TestReportIsSafe(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ans := ReportIsValid(tt.report.Queue.Head, tt.sorting, 1, 3)
+			ans := ValidQueue(tt.report.Queue.Head, tt.sorting, 1, 3)
 			if ans != tt.want {
 				t.Errorf("got %v, want %v", ans, tt.want)
 			}
@@ -85,79 +85,79 @@ func TestReportIsSafe(t *testing.T) {
 func TestImprovedReportValid(t *testing.T) {
 	var tests = []struct {
 		name    string
-		report  ImprovedReport
+		report  ReportDoublyLinkedList
 		sorting int
 		want    bool
 	}{
 		{
 			// Safe without removing any level.
 			name:    "Valid_SiteExampleReport_#1_DescendingLevels",
-			report:  ImprovedReport{dst.NewList(7, 6, 4, 2, 1)},
+			report:  ReportDoublyLinkedList{dst.NewList(7, 6, 4, 2, 1)},
 			sorting: 1,
 			want:    true,
 		},
 		{
 			// Unsafe regardless of which level is removed.
 			name:    "InValid_SiteExampleReport_#2_AscendingLevels_OutOfRange",
-			report:  ImprovedReport{dst.NewList(1, 2, 7, 8, 9)},
+			report:  ReportDoublyLinkedList{dst.NewList(1, 2, 7, 8, 9)},
 			sorting: -1,
 			want:    false,
 		},
 		{
 			// Unsafe regardless of which level is removed.
 			name:    "InValid_SiteExampleReport_#3_AscendingLevels_OutOfRange",
-			report:  ImprovedReport{dst.NewList(9, 7, 6, 2, 1)},
+			report:  ReportDoublyLinkedList{dst.NewList(9, 7, 6, 2, 1)},
 			sorting: 1,
 			want:    false,
 		},
 		{
 			// Safe by removing the second level, 3.
 			name:    "Valid_SiteExampleReport_#4_AscendingLevels_OutOfRange_ValidAfterRemovingSecondLevel",
-			report:  ImprovedReport{dst.NewList(1, 3, 2, 4, 5)},
+			report:  ReportDoublyLinkedList{dst.NewList(1, 3, 2, 4, 5)},
 			sorting: -1,
 			want:    true,
 		},
 		{
 			// Safe by removing the third level, 4.
 			name:    "Valid_SiteExampleReport_#5_AscendingLevels_Duplicates_ValidAfterRemovingThirdLevel",
-			report:  ImprovedReport{dst.NewList(8, 6, 4, 4, 1)},
+			report:  ReportDoublyLinkedList{dst.NewList(8, 6, 4, 4, 1)},
 			sorting: 1,
 			want:    true,
 		},
 		{
 			// Safe without removing any level.
 			name:    "Valid_SiteExampleReport_#6_AscendingLevels",
-			report:  ImprovedReport{dst.NewList(1, 3, 6, 7, 9)},
+			report:  ReportDoublyLinkedList{dst.NewList(1, 3, 6, 7, 9)},
 			sorting: -1,
 			want:    true,
 		},
 		{
 			name:    "AscendingLevels_ValidAfterRemovingLevel",
-			report:  ImprovedReport{dst.NewList(1, 9, 2, 3, 4)},
+			report:  ReportDoublyLinkedList{dst.NewList(1, 9, 2, 3, 4)},
 			sorting: -1,
 			want:    true,
 		},
 		{
 			name:    "Level_AscendingLevels_OutOfRange_ValidAfterRemovingLastLevel",
-			report:  ImprovedReport{dst.NewList(1, 2, 3, 4, 9)},
+			report:  ReportDoublyLinkedList{dst.NewList(1, 2, 3, 4, 9)},
 			sorting: -1,
 			want:    true,
 		},
 		{
 			name:    "Valid_AscendingLevels_ValidAfterRemovingFirstLevel",
-			report:  ImprovedReport{dst.NewList(9, 1, 2, 3, 4)},
+			report:  ReportDoublyLinkedList{dst.NewList(9, 1, 2, 3, 4)},
 			sorting: 1,
 			want:    true,
 		},
 		{
 			name:    "Valid_AscendingLevels_Duplicates_ValidAfterRemovingDuplicateLevel",
-			report:  ImprovedReport{dst.NewList(1, 1, 2, 3, 4, 5)},
+			report:  ReportDoublyLinkedList{dst.NewList(1, 1, 2, 3, 4, 5)},
 			sorting: 0,
 			want:    true,
 		},
 		{
 			name:    "Invalid_AscendingLevels_DuplicatesAndOutOfRange",
-			report:  ImprovedReport{dst.NewList(1, 1, 2, 6, 7, 8, 9)},
+			report:  ReportDoublyLinkedList{dst.NewList(1, 1, 2, 6, 7, 8, 9)},
 			sorting: 0,
 			want:    false,
 		},
@@ -173,26 +173,22 @@ func TestImprovedReportValid(t *testing.T) {
 	}
 }
 
-func constructReports(reportsInput [][]int) []Report {
-	var reports []Report
+func constructReports(reportsInput [][]int) []ReportQueue {
+	var reports []ReportQueue
 	for row := 0; row < len(reportsInput); row++ {
 		nums := reportsInput[row]
 		reports = append(reports, *CreateReport(nums...))
 	}
 
-	// Iterate over columns
-
 	return reports
 }
 
-func constructImprovedReports(reportsInput [][]int) []ImprovedReport {
-	var reports []ImprovedReport
+func constructImprovedReports(reportsInput [][]int) []ReportDoublyLinkedList {
+	var reports []ReportDoublyLinkedList
 	for row := 0; row < len(reportsInput); row++ {
 		nums := reportsInput[row]
 		reports = append(reports, *CreateImprovedReport(nums...))
 	}
-
-	// Iterate over columns
 
 	return reports
 }
