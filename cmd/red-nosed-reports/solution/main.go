@@ -166,7 +166,12 @@ func ImprovedReportValid(list *dst.DoubleLinkedList, element *dst.ListElement, s
 		var listChildRemoved = CopyList(*list)
 		listElementRemoved.Delete(element)
 		listChildRemoved.Delete(element.Next)
-		return ImprovedReportValid(listElementRemoved, element.Next, sorting, min, max, true) ||
+
+		newSort := sorting
+		if element.Prev == nil {
+			newSort = cmp.Compare(element.Next.Key, element.Next.Next.Key)
+		}
+		return ImprovedReportValid(listElementRemoved, element.Next, newSort, min, max, true) ||
 			ImprovedReportValid(listChildRemoved, element.Next.Next, sorting, min, max, true)
 	}
 
