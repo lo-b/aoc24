@@ -156,8 +156,7 @@ func ImprovedReportValid(list *dst.DoubleLinkedList, element *dst.ListElement, s
 		return false
 	}
 
-	// NOTE: curr element == Tail
-	if !elementInvalid && element.Next == nil {
+	if !elementInvalid && element.Next.Next == nil {
 		return true
 	}
 
