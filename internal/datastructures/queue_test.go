@@ -12,13 +12,13 @@ func TestEnqueue(t *testing.T) {
 		expectedTail int
 	}{
 		{
-			name:         "enqueue to empty queue",
+			name:         "Enqueue to empty queue",
 			initialQueue: NewEmptyQueue(),
 			enqueues:     []int{10},
 			expectedTail: 10,
 		},
 		{
-			name:         "enqueue multiple items",
+			name:         "Enqueue multiple elements into non-empty queue",
 			initialQueue: NewQueue(1, 1),
 			enqueues:     []int{2, 3, 4},
 			expectedTail: 4,
@@ -33,8 +33,8 @@ func TestEnqueue(t *testing.T) {
 				q.Enqueue(data)
 			}
 
-			if q.Tail == nil || q.Tail.Data != tt.expectedTail {
-				t.Errorf("expected tail to have data %v, got %v", tt.expectedTail, q.Tail)
+			if q.Tail == nil || q.Tail.Key != tt.expectedTail {
+				t.Errorf("expected tail to have key %v, got %v", tt.expectedTail, q.Tail)
 			}
 		})
 	}
@@ -45,7 +45,7 @@ func TestDequeue(t *testing.T) {
 		name          string
 		initialQueue  *Queue
 		dequeueAmount int
-		expectedHead  *Element
+		expectedHead  *QueueElement
 	}{
 		{
 			name:          "dequeue from empty queue",

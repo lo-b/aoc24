@@ -1,6 +1,3 @@
-// Package datastructures contains utility data structures.
-//
-// The datastructures package can be used to solve Advent of Code puzzles.
 package datastructures
 
 // Queue implements a dynamic set with the first-in, first-out (FIFO) policy
@@ -12,20 +9,21 @@ package datastructures
 // Data can be deqeueud (removal + return of Head element) or enqueued (new
 // data added as Tail element).
 type Queue struct {
-	Head *Element
-	Tail *Element
+	Head *QueueElement
+	Tail *QueueElement
 }
 
-// Element type contains integer (sattelite) data and a pointer to the next
-// Element (or NIL) if it is the Tail node. Used as building block for queue.
-type Element struct {
-	Data int
-	Next *Element
+// QueueElement type contains integer Key (sattelite data) and a pointer to the
+// Next QueueElement (or NIL) if it is the Tail node. Used as a building block
+// for a Queue.
+type QueueElement struct {
+	Key  int
+	Next *QueueElement
 }
 
 // Enqueue adds data as a new Element to the end of the queue.
 func (q *Queue) Enqueue(data int) {
-	newNode := &Element{Data: data}
+	newNode := &QueueElement{Key: data}
 
 	if q.isEmpty() {
 		// Queue is empty; Head and Tail will point to the new node
@@ -40,7 +38,7 @@ func (q *Queue) Enqueue(data int) {
 
 // Dequeue removes the first element in the queue, or NIL if Queue is empty, and return
 // it.
-func (q *Queue) Dequeue() *Element {
+func (q *Queue) Dequeue() *QueueElement {
 	if q.isEmpty() {
 		return nil
 	}

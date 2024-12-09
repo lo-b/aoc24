@@ -1,6 +1,6 @@
 package datastructures
 
-type DoubleLinkedList struct {
+type DoublyLinkedList struct {
 	Head *ListElement
 	Tail *ListElement
 }
@@ -11,7 +11,7 @@ type ListElement struct {
 	Prev *ListElement
 }
 
-func (list *DoubleLinkedList) Insert(element *ListElement) {
+func (list *DoublyLinkedList) Insert(element *ListElement) {
 	if list.Head == nil {
 		list.Head = element
 	}
@@ -23,7 +23,7 @@ func (list *DoubleLinkedList) Insert(element *ListElement) {
 	element.Next = nil
 }
 
-func (list *DoubleLinkedList) Delete(element *ListElement) {
+func (list *DoublyLinkedList) Delete(element *ListElement) {
 	// update link to Next of previous element
 	if element.Prev != nil {
 		element.Prev.Next = element.Next
@@ -39,12 +39,12 @@ func (list *DoubleLinkedList) Delete(element *ListElement) {
 	}
 }
 
-func NewEmptyList() *DoubleLinkedList {
-	return &DoubleLinkedList{Head: nil, Tail: nil}
+func NewEmptyList() *DoublyLinkedList {
+	return &DoublyLinkedList{Head: nil, Tail: nil}
 }
 
 // NewQueue creates a new Queue using variable int arg(s).
-func NewList(keys ...int) *DoubleLinkedList {
+func NewList(keys ...int) *DoublyLinkedList {
 	var list = NewEmptyList()
 	for _, key := range keys {
 		list.Insert(&ListElement{Key: key, Next: nil, Prev: nil})
@@ -53,7 +53,7 @@ func NewList(keys ...int) *DoubleLinkedList {
 	return list
 }
 
-func NewListFromSlice(keys []int) *DoubleLinkedList {
+func NewListFromSlice(keys []int) *DoublyLinkedList {
 	var list = NewEmptyList()
 	for _, key := range keys {
 		list.Insert(&ListElement{Key: key})

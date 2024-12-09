@@ -9,21 +9,21 @@ import (
 func TestInsert(t *testing.T) {
 	tests := []struct {
 		name            string
-		initialList     *dst.DoubleLinkedList
+		initialList     *dst.DoublyLinkedList
 		insertElements  []*dst.ListElement
 		expectedHeadKey int
 		expectedTailKey int
 	}{
 		{
 			name:            "Insert element into empty list",
-			initialList:     &dst.DoubleLinkedList{Head: nil, Tail: nil},
+			initialList:     &dst.DoublyLinkedList{Head: nil, Tail: nil},
 			insertElements:  []*dst.ListElement{{Key: 10}},
 			expectedHeadKey: 10,
 			expectedTailKey: 10,
 		},
 		{
 			name:            "Insert elements into list with Head set",
-			initialList:     &dst.DoubleLinkedList{Head: createElement(3), Tail: nil},
+			initialList:     &dst.DoublyLinkedList{Head: createElement(3), Tail: nil},
 			insertElements:  []*dst.ListElement{{Key: 10}, {Key: 7}},
 			expectedHeadKey: 3,
 			expectedTailKey: 7,
@@ -59,12 +59,12 @@ func TestInsert(t *testing.T) {
 func TestLinks(t *testing.T) {
 	tests := []struct {
 		name    string
-		list    *dst.DoubleLinkedList
+		list    *dst.DoublyLinkedList
 		inserts []*dst.ListElement
 	}{
 		{
 			name:    "Insert 1, 2, 3, 4",
-			list:    &dst.DoubleLinkedList{Head: nil, Tail: nil},
+			list:    &dst.DoublyLinkedList{Head: nil, Tail: nil},
 			inserts: []*dst.ListElement{createElement(1), createElement(2), createElement(3), createElement(4)},
 		},
 	}
@@ -117,7 +117,7 @@ func TestLinks(t *testing.T) {
 
 func TestDelete_DeleteHeadTail_EmptyListLeft(t *testing.T) {
 
-	list := &dst.DoubleLinkedList{Head: nil, Tail: nil}
+	list := &dst.DoublyLinkedList{Head: nil, Tail: nil}
 	insertElements := []*dst.ListElement{{Key: 1}, {Key: 2}}
 
 	for _, element := range insertElements {
@@ -128,11 +128,11 @@ func TestDelete_DeleteHeadTail_EmptyListLeft(t *testing.T) {
 	list.Delete(list.Tail)
 
 	if list.Tail != nil {
-		t.Error("expected Tail to be nil")
+		t.Error("expected Tail to be NIL")
 	}
 
 	if list.Head != nil {
-		t.Error("expected Head to be nil")
+		t.Error("expected Head to be NIL")
 	}
 }
 
@@ -140,7 +140,7 @@ func TestDelete_DeleteHeadTail_SingleElementLeft(t *testing.T) {
 	// expected key left after removal
 	expectedKey := 2
 
-	list := &dst.DoubleLinkedList{Head: nil, Tail: nil}
+	list := &dst.DoublyLinkedList{Head: nil, Tail: nil}
 	insertElements := []*dst.ListElement{{Key: 1}, {Key: 2}, {Key: 3}}
 
 	for _, element := range insertElements {
