@@ -17,10 +17,16 @@ func main() {
 		fmt.Println("Error:", err)
 		return
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			fmt.Printf("Error closing file: %v", err)
+		}
+	}()
 
 	reader := bufio.NewReader(file)
-	left, right := []int{}, []int{}
+
+	// left and right contain all location ids read of left and right col resp.
+	var left, right []int
 	lineNum := 0
 	for {
 		line, err := reader.ReadString('\n')
