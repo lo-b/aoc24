@@ -1,13 +1,13 @@
 package main
 
 import (
-	"bufio"
 	"cmp"
 	"fmt"
 	"math"
-	"os"
 	"strconv"
 	"strings"
+
+	"github.com/lo-b/aoc24/internal/puzzleio"
 )
 
 const (
@@ -21,7 +21,8 @@ func main() {
 	fmt.Println("Use tolerance module? true/False")
 	fmt.Scanln(&useTolerance)
 
-	file, err := os.Open("./assets/reports.txt")
+	puzzleInput, err := puzzleio.NewInputReader("./assets/reports.txt")
+	file := puzzleInput.File
 	if err != nil {
 		fmt.Println("Unable to read input file")
 		fmt.Println("Error:", err)
@@ -33,7 +34,7 @@ func main() {
 		}
 	}()
 
-	reader := bufio.NewReader(file)
+	reader := puzzleInput.Reader
 
 	var validReportCount = 0
 	for {

@@ -1,17 +1,18 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"math"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/lo-b/aoc24/internal/puzzleio"
 )
 
 func main() {
-	file, err := os.Open("./assets/location_ids.txt")
+	puzzleInput, err := puzzleio.NewInputReader("./assets/location_ids.txt")
+	file := puzzleInput.File
 	if err != nil {
 		fmt.Println("Unable to read input file")
 		fmt.Println("Error:", err)
@@ -23,7 +24,7 @@ func main() {
 		}
 	}()
 
-	reader := bufio.NewReader(file)
+	reader := puzzleInput.Reader
 
 	// left and right contain all location ids read of left and right col resp.
 	var left, right []int
