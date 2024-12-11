@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	puzzleInput, err := puzzleio.NewInputReader("./assets/location_ids.txt")
+	puzzleInput, err := puzzleio.NewPuzzleInput("./assets/location_ids.txt")
 	file := puzzleInput.File
 	if err != nil {
 		fmt.Println("Unable to read input file")

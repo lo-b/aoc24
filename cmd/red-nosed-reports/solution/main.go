@@ -21,7 +21,7 @@ func main() {
 	fmt.Println("Use tolerance module? true/False")
 	fmt.Scanln(&useTolerance)
 
-	puzzleInput, err := puzzleio.NewInputReader("./assets/reports.txt")
+	puzzleInput, err := puzzleio.NewPuzzleInput("./assets/reports.txt")
 	file := puzzleInput.File
 	if err != nil {
 		fmt.Println("Unable to read input file")
