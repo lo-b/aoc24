@@ -38,11 +38,11 @@ func main() {
 	fmt.Printf("Total sum of 'mul' expressions: %d\n", totalSum)
 }
 
-// Parse searches line for valid multiplcation expressions, execute them, sum
-// them up and finally return the total sum of a line. Instruction is defined
-// as 'mul(X,Y)' where X, Y are ints in range [-999, 999].
+// Parse interprets valid multiplication expressions and returns their sum. A
+// valid multiplication expression is defined as 'mul(X,Y)' where X, Y are ints
+// in range [-999, 999].
 func Parse(line string) int {
-	const Instruction = "mul("
+	const Expression = "mul("
 	const Seperator = ','
 	const EndChar = ')'
 
@@ -50,17 +50,17 @@ func Parse(line string) int {
 	digitStrLength := max(len(strconv.Itoa(digitRange[0])), len(strconv.Itoa(digitRange[1])))
 	indexedLine := suffixarray.New([]byte(line))
 
-	// return all occurences of valid instruction start
-	offsets := indexedLine.Lookup([]byte(Instruction), -1)
+	// return all occurrences of valid expression start
+	offsets := indexedLine.Lookup([]byte(Expression), -1)
 
 	var mulSum int
 	for _, offset := range offsets {
-		lengthOffsetInstruction := offset + len(Instruction)
-		sepIdx := strings.Index(line[offset:lengthOffsetInstruction+digitStrLength], string(Seperator))
+		lengthOffsetExpression := offset + len(Expression)
+		sepIdx := strings.Index(line[offset:lengthOffsetExpression+digitStrLength], string(Seperator))
 
 		if sepIdx >= 0 {
 			closeParenthesisIdx := strings.Index(line[offset:], string(EndChar))
-			possibleLeftDigitSlice := line[offset+len(Instruction) : offset+sepIdx]
+			possibleLeftDigitSlice := line[offset+len(Expression) : offset+sepIdx]
 			possibleRightDigitSlice := line[offset+sepIdx+1 : offset+closeParenthesisIdx]
 			leftDigit, leftDigitErr := strconv.Atoi(possibleLeftDigitSlice)
 			rightDigit, rightDigitErr := strconv.Atoi(possibleRightDigitSlice)
