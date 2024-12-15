@@ -46,34 +46,37 @@ func Parse(line string) int {
 	const Seperator = ','
 	const EndChar = ')'
 
-	digitRange := [2]int{-999, 999}
-	digitStrLength := max(len(strconv.Itoa(digitRange[0])), len(strconv.Itoa(digitRange[1])))
 	indexedLine := suffixarray.New([]byte(line))
-
 	// return all occurrences of valid expression start
 	offsets := indexedLine.Lookup([]byte(Expression), -1)
 
 	var mulSum int
 	for _, offset := range offsets {
-		lengthOffsetExpression := offset + len(Expression)
-		sepIdx := strings.Index(line[offset:lengthOffsetExpression+digitStrLength], string(Seperator))
-
-		if sepIdx >= 0 {
-			closeParenthesisIdx := strings.Index(line[offset:], string(EndChar))
-			possibleLeftDigitSlice := line[offset+len(Expression) : offset+sepIdx]
-			possibleRightDigitSlice := line[offset+sepIdx+1 : offset+closeParenthesisIdx]
-			leftDigit, leftDigitErr := strconv.Atoi(possibleLeftDigitSlice)
-			rightDigit, rightDigitErr := strconv.Atoi(possibleRightDigitSlice)
-
-			if leftDigitErr != nil || rightDigitErr != nil {
-				continue
-			}
-
-			mulSum += leftDigit * rightDigit
-		} else {
-			continue
-		}
+		mulSum += TryMulOperation(line, offset, Expression, Seperator, EndChar)
 	}
 
 	return mulSum
+}
+
+func TryMulOperation(line string, offset int, operation string, seperator rune, endChar rune) int {
+	digitRange := [2]int{-999, 999}
+	lengthOffsetExpression := offset + len(operation)
+	digitStrLength := max(len(strconv.Itoa(digitRange[0])), len(strconv.Itoa(digitRange[1])))
+	sepIdx := strings.Index(line[offset:lengthOffsetExpression+digitStrLength], string(seperator))
+
+	if sepIdx >= 0 {
+		closeParenthesisIdx := strings.Index(line[offset:], string(endChar))
+		possibleLeftDigitSlice := line[offset+len(operation) : offset+sepIdx]
+		possibleRightDigitSlice := line[offset+sepIdx+1 : offset+closeParenthesisIdx]
+		leftDigit, leftDigitErr := strconv.Atoi(possibleLeftDigitSlice)
+		rightDigit, rightDigitErr := strconv.Atoi(possibleRightDigitSlice)
+
+		if leftDigitErr != nil || rightDigitErr != nil {
+			return 0
+		}
+
+		return leftDigit * rightDigit
+	}
+
+	return 0
 }
