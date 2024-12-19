@@ -43,7 +43,8 @@ func NewEmptyList() *DoublyLinkedList {
 	return &DoublyLinkedList{Head: nil, Tail: nil}
 }
 
-// NewQueue creates a new Queue using variable int arg(s).
+// NewList creates a new list using variable int arg(s). Underlying data
+// structure is a DoublyLinkedList .
 func NewList(keys ...int) *DoublyLinkedList {
 	var list = NewEmptyList()
 	for _, key := range keys {
